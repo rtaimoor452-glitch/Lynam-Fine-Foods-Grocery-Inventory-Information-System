@@ -49,6 +49,17 @@ require_once __DIR__ . '/../config/database.php';
 $pdo = getDatabase();
 
 // ============================================================
+// VALIDATION CONSTANTS
+// ============================================================
+
+// Maximum allowed values for validation
+// These constants ensure data integrity and prevent unreasonable inputs
+define('MAX_NAME_LENGTH', 100);
+define('MAX_SUPPLIER_LENGTH', 100);
+define('MAX_PRICE', 99999);
+define('MAX_QUANTITY', 99999);
+
+// ============================================================
 // REQUEST ROUTING
 // ============================================================
 
@@ -417,13 +428,6 @@ function deleteProduct($pdo, $id) {
 // ============================================================
 // VALIDATION FUNCTION
 // ============================================================
-
-// Maximum allowed values for validation
-// These constants ensure data integrity and prevent unreasonable inputs
-define('MAX_NAME_LENGTH', 100);
-define('MAX_SUPPLIER_LENGTH', 100);
-define('MAX_PRICE', 99999);
-define('MAX_QUANTITY', 99999);
 
 /**
  * Validate product input data
