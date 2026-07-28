@@ -31,12 +31,22 @@ var API_URL = 'api/products.php';
 // Products with quantity below this number trigger a low-stock warning
 var LOW_STOCK_THRESHOLD = 5;
 
+// Maximum allowed values for validation
+var MAX_PRICE = 99999;
+var MAX_QUANTITY = 99999;
+var MAX_NAME_LENGTH = 100;
+var MAX_SUPPLIER_LENGTH = 100;
+
 // Store all products loaded from the API
 // This array is used for client-side search, filter and sort
 var allProducts = [];
 
 // Track whether the form is in "edit" mode or "add" mode
 var isEditing = false;
+
+// Track whether an API request is currently in progress
+// This prevents duplicate submissions if the user clicks quickly
+var isRequestInProgress = false;
 
 // ============================================================
 // INITIALISATION
@@ -72,6 +82,57 @@ document.addEventListener('DOMContentLoaded', function () {
 // ============================================================
 
 /**
+ * Show the loading indicator and disable form buttons
+ * 
+ * This provides visual feedback to the user that an API
+ * request is in progress and prevents duplicate submissions.
+ */
+function showLoading() {
+    isRequestInProgress = true;
+    var loadingIndicator = document.getElementById('loading-indicator');
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'flex';
+    }
+    setFormButtonsDisabled(true);
+}
+
+/**
+ * Hide the loading indicator and re-enable form buttons
+ * 
+ * Called after an API request completes (success or failure).
+ */
+function hideLoading() {
+    isRequestInProgress = false;
+    var loadingIndicator = document.getElementById('loading-indicator');
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'none';
+    }
+    setFormButtonsDisabled(false);
+}
+
+/**
+ * Enable or disable the form submit and cancel buttons
+ * 
+ * Disabling buttons during API requests prevents the user
+ * from submitting the same data twice.
+ * 
+ * @param {boolean} disabled - true to disable, false to enable
+ */
+function setFormButtonsDisabled(disabled) {
+    var submitBtn = document.getElementById('submit-btn');
+    var cancelBtn = document.getElementById('cancel-btn');
+
+    if (submitBtn) {
+        submitBtn.disabled = disabled;
+        submitBtn.textContent = disabled ? 'Please Wait...' :
+            (isEditing ? 'Update Product' : 'Add Product');
+    }
+    if (cancelBtn) {
+        cancelBtn.disabled = disabled;
+    }
+}
+
+/**
  * Load all products from the API
  * 
  * Makes a GET request to: api/products.php
@@ -81,6 +142,8 @@ document.addEventListener('DOMContentLoaded', function () {
  * filters, and update the summary statistics
  */
 function loadProducts() {
+    showLoading();
+
     fetch(API_URL)
         .then(function (response) {
             // Check if the response was successful (status 200-299)
@@ -103,6 +166,10 @@ function loadProducts() {
         .catch(function (error) {
             // Show an error message if the request fails
             showMessage('Error loading products: ' + error.message, 'error');
+        })
+        .finally(function () {
+            // Always hide the loading indicator when done
+            hideLoading();
         });
 }
 
@@ -115,6 +182,12 @@ function loadProducts() {
  * @param {Object} productData - The product data from the form
  */
 function createProductAPI(productData) {
+    // Prevent duplicate submissions
+    if (isRequestInProgress) {
+        return;
+    }
+    showLoading();
+
     fetch(API_URL, {
         method: 'POST',
         headers: {
@@ -141,9 +214,16 @@ function createProductAPI(productData) {
             showMessage('Product created successfully!', 'success');
             resetForm();
             loadProducts();
+
+            // Move focus to the message area so screen readers announce success
+            focusMessageArea();
         })
         .catch(function (error) {
             showMessage('Error: ' + error.message, 'error');
+            focusMessageArea();
+        })
+        .finally(function () {
+            hideLoading();
         });
 }
 

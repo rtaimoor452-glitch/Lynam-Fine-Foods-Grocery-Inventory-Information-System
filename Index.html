@@ -11,15 +11,18 @@
 
 <body>
 
+    <!-- Skip navigation link for keyboard and screen reader users -->
+    <a href="#form-section" class="skip-link">Skip to main content</a>
+
     <!-- ============================================================ -->
     <!-- HEADER - Shop name and system title                          -->
     <!-- ============================================================ -->
-    <header>
+    <header role="banner">
         <h1>Lynam Fine Foods</h1>
         <p>Grocery Inventory Information System</p>
     </header>
 
-    <main>
+    <main role="main">
 
         <!-- ============================================================ -->
         <!-- MESSAGE AREA - Success and error messages appear here        -->
@@ -58,14 +61,17 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="product-name">Product Name <span class="required">*</span></label>
+                        <label for="product-name">Product Name <span class="required" aria-hidden="true">*</span></label>
                         <input type="text" id="product-name" name="product_name"
-                               placeholder="e.g. Irish Soda Bread" required>
+                               placeholder="e.g. Irish Soda Bread" required
+                               maxlength="100" aria-required="true"
+                               aria-describedby="name-hint">
+                        <small id="name-hint" class="field-hint">Required. Max 100 characters.</small>
                     </div>
 
                     <div class="form-group">
-                        <label for="category">Category <span class="required">*</span></label>
-                        <select id="category" name="category" required>
+                        <label for="category">Category <span class="required" aria-hidden="true">*</span></label>
+                        <select id="category" name="category" required aria-required="true">
                             <option value="">-- Select Category --</option>
                             <option value="Bakery">Bakery</option>
                             <option value="Dairy">Dairy</option>
@@ -83,15 +89,19 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="price">Price (&euro;) <span class="required">*</span></label>
+                        <label for="price">Price (&euro;) <span class="required" aria-hidden="true">*</span></label>
                         <input type="number" id="price" name="price"
-                               step="0.01" min="0" placeholder="e.g. 3.50" required>
+                               step="0.01" min="0" max="99999" placeholder="e.g. 3.50" required
+                               aria-required="true" aria-describedby="price-hint">
+                        <small id="price-hint" class="field-hint">Required. Must be 0 or greater.</small>
                     </div>
 
                     <div class="form-group">
-                        <label for="quantity">Quantity <span class="required">*</span></label>
+                        <label for="quantity">Quantity <span class="required" aria-hidden="true">*</span></label>
                         <input type="number" id="quantity" name="quantity"
-                               step="1" min="0" placeholder="e.g. 20" required>
+                               step="1" min="0" max="99999" placeholder="e.g. 20" required
+                               aria-required="true" aria-describedby="qty-hint">
+                        <small id="qty-hint" class="field-hint">Required. Whole number, 0 or greater.</small>
                     </div>
                 </div>
 
@@ -99,18 +109,22 @@
                     <div class="form-group">
                         <label for="supplier">Supplier</label>
                         <input type="text" id="supplier" name="supplier"
-                               placeholder="e.g. Brennans">
+                               placeholder="e.g. Brennans" maxlength="100"
+                               aria-describedby="supplier-hint">
+                        <small id="supplier-hint" class="field-hint">Optional. Max 100 characters.</small>
                     </div>
 
                     <div class="form-group">
                         <label for="expiry-date">Expiry Date</label>
-                        <input type="date" id="expiry-date" name="expiry_date">
+                        <input type="date" id="expiry-date" name="expiry_date"
+                               aria-describedby="expiry-hint">
+                        <small id="expiry-hint" class="field-hint">Optional. Format: YYYY-MM-DD.</small>
                     </div>
                 </div>
 
                 <div class="form-buttons">
-                    <button type="submit" id="submit-btn">Add Product</button>
-                    <button type="button" id="cancel-btn" style="display: none;">Cancel Edit</button>
+                    <button type="submit" id="submit-btn" aria-label="Add product to inventory">Add Product</button>
+                    <button type="button" id="cancel-btn" style="display: none;" aria-label="Cancel editing and reset form">Cancel Edit</button>
                 </div>
             </form>
         </section>
@@ -160,24 +174,31 @@
         <!-- TABLE SECTION - Products table with Edit and Delete buttons  -->
         <!-- ============================================================ -->
         <section id="table-section" aria-label="Products Table">
-            <table id="products-table">
+            <!-- Loading indicator shown while API requests are in progress -->
+            <div id="loading-indicator" role="status" aria-live="polite" style="display: none;">
+                <span class="loading-spinner" aria-hidden="true"></span>
+                <span>Loading products...</span>
+            </div>
+
+            <table id="products-table" aria-label="Product inventory list">
+                <caption class="sr-only">List of all products in the Lynam Fine Foods inventory with actions to edit or delete each product</caption>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Product Name</th>
-                        <th>Category</th>
-                        <th>Price (&euro;)</th>
-                        <th>Quantity</th>
-                        <th>Supplier</th>
-                        <th>Expiry Date</th>
-                        <th>Actions</th>
+                        <th scope="col">ID</th>
+                        <th scope="col">Product Name</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Price (&euro;)</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Supplier</th>
+                        <th scope="col">Expiry Date</th>
+                        <th scope="col">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="products-tbody">
                     <!-- Product rows are inserted here by JavaScript -->
                 </tbody>
             </table>
-            <p id="no-products-message" style="display: none;">No products found.</p>
+            <p id="no-products-message" style="display: none;" role="status">No products found.</p>
         </section>
 
     </main>
@@ -185,8 +206,9 @@
     <!-- ============================================================ -->
     <!-- FOOTER                                                       -->
     <!-- ============================================================ -->
-    <footer>
+    <footer role="contentinfo">
         <p>&copy; 2025 Lynam Fine Foods Inventory System &mdash; Academic Project (B9IS123)</p>
+        <p class="footer-note">Proof-of-concept for Programming for Information Systems (B9IS123), Dublin Business School</p>
     </footer>
 
     <!-- JavaScript file - loaded at end of body for performance -->
