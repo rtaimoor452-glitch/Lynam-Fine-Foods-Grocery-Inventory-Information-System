@@ -418,6 +418,13 @@ function deleteProduct($pdo, $id) {
 // VALIDATION FUNCTION
 // ============================================================
 
+// Maximum allowed values for validation
+// These constants ensure data integrity and prevent unreasonable inputs
+define('MAX_NAME_LENGTH', 100);
+define('MAX_SUPPLIER_LENGTH', 100);
+define('MAX_PRICE', 99999);
+define('MAX_QUANTITY', 99999);
+
 /**
  * Validate product input data
  * 
@@ -438,6 +445,8 @@ function validateProduct($data) {
     // Product name is required and must not be empty after trimming
     if (!isset($data['product_name']) || trim($data['product_name']) === '') {
         $errors[] = 'Product name is required';
+    } elseif (strlen(trim($data['product_name'])) > MAX_NAME_LENGTH) {
+        $errors[] = 'Product name must be ' . MAX_NAME_LENGTH . ' characters or less';
     }
 
     // Category is required and must not be empty after trimming
@@ -450,6 +459,8 @@ function validateProduct($data) {
         $errors[] = 'Price must be a valid number';
     } elseif (floatval($data['price']) < 0) {
         $errors[] = 'Price cannot be negative';
+    } elseif (floatval($data['price']) > MAX_PRICE) {
+        $errors[] = 'Price cannot exceed ' . MAX_PRICE;
     }
 
     // Quantity must be present, numeric, a whole number, and not negative
@@ -459,6 +470,15 @@ function validateProduct($data) {
         $errors[] = 'Quantity must be a whole number';
     } elseif (intval($data['quantity']) < 0) {
         $errors[] = 'Quantity cannot be negative';
+    } elseif (intval($data['quantity']) > MAX_QUANTITY) {
+        $errors[] = 'Quantity cannot exceed ' . MAX_QUANTITY;
+    }
+
+    // Supplier is optional but has a maximum length
+    if (isset($data['supplier']) && trim($data['supplier']) !== '') {
+        if (strlen(trim($data['supplier'])) > MAX_SUPPLIER_LENGTH) {
+            $errors[] = 'Supplier name must be ' . MAX_SUPPLIER_LENGTH . ' characters or less';
+        }
     }
 
     // Expiry date is optional, but must be valid YYYY-MM-DD if provided

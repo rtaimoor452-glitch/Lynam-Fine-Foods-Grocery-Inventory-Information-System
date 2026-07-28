@@ -237,6 +237,12 @@ function createProductAPI(productData) {
  * @param {Object} productData - The updated product data from the form
  */
 function updateProductAPI(id, productData) {
+    // Prevent duplicate submissions
+    if (isRequestInProgress) {
+        return;
+    }
+    showLoading();
+
     fetch(API_URL + '?id=' + id, {
         method: 'PUT',
         headers: {
@@ -260,9 +266,16 @@ function updateProductAPI(id, productData) {
             showMessage('Product updated successfully!', 'success');
             resetForm();
             loadProducts();
+
+            // Move focus to the message area so screen readers announce success
+            focusMessageArea();
         })
         .catch(function (error) {
             showMessage('Error: ' + error.message, 'error');
+            focusMessageArea();
+        })
+        .finally(function () {
+            hideLoading();
         });
 }
 
@@ -275,6 +288,12 @@ function updateProductAPI(id, productData) {
  * @param {number} id - The product ID to delete
  */
 function deleteProductAPI(id) {
+    // Prevent duplicate submissions
+    if (isRequestInProgress) {
+        return;
+    }
+    showLoading();
+
     fetch(API_URL + '?id=' + id, {
         method: 'DELETE'
     })
@@ -290,9 +309,16 @@ function deleteProductAPI(id) {
 
             showMessage('Product deleted successfully!', 'success');
             loadProducts();
+
+            // Move focus to the message area so screen readers announce success
+            focusMessageArea();
         })
         .catch(function (error) {
             showMessage('Error: ' + error.message, 'error');
+            focusMessageArea();
+        })
+        .finally(function () {
+            hideLoading();
         });
 }
 
@@ -314,7 +340,14 @@ function handleFormSubmit(event) {
     // Without this, the browser would refresh the page
     event.preventDefault();
 
+    // Prevent submission if a request is already in progress
+    if (isRequestInProgress) {
+        showMessage('Please wait, your request is being processed...', 'error');
+        return;
+    }
+
     // Collect data from the form fields
+    // trim() removes leading and trailing whitespace
     var productData = {
         product_name: document.getElementById('product-name').value.trim(),
         category: document.getElementById('category').value.trim(),
@@ -329,6 +362,7 @@ function handleFormSubmit(event) {
     var errors = validateProductFrontend(productData);
     if (errors.length > 0) {
         showMessage('Please fix the following errors: ' + errors.join(', '), 'error');
+        focusMessageArea();
         return;
     }
 
@@ -684,6 +718,8 @@ function validateProductFrontend(data) {
     // Product name is required
     if (!data.product_name || data.product_name.trim() === '') {
         errors.push('Product name is required');
+    } else if (data.product_name.length > MAX_NAME_LENGTH) {
+        errors.push('Product name must be ' + MAX_NAME_LENGTH + ' characters or less');
     }
 
     // Category is required
@@ -696,6 +732,8 @@ function validateProductFrontend(data) {
         errors.push('Price must be a valid number');
     } else if (parseFloat(data.price) < 0) {
         errors.push('Price cannot be negative');
+    } else if (parseFloat(data.price) > MAX_PRICE) {
+        errors.push('Price cannot exceed ' + MAX_PRICE);
     }
 
     // Quantity must be a whole number and not negative
@@ -705,6 +743,13 @@ function validateProductFrontend(data) {
         errors.push('Quantity must be a whole number');
     } else if (parseInt(data.quantity) < 0) {
         errors.push('Quantity cannot be negative');
+    } else if (parseInt(data.quantity) > MAX_QUANTITY) {
+        errors.push('Quantity cannot exceed ' + MAX_QUANTITY);
+    }
+
+    // Supplier is optional but has a maximum length
+    if (data.supplier && data.supplier.length > MAX_SUPPLIER_LENGTH) {
+        errors.push('Supplier name must be ' + MAX_SUPPLIER_LENGTH + ' characters or less');
     }
 
     // Expiry date must be a valid format if provided
@@ -712,6 +757,17 @@ function validateProductFrontend(data) {
         var dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (!dateRegex.test(data.expiry_date)) {
             errors.push('Expiry date must be in YYYY-MM-DD format');
+        } else {
+            // Additional check: verify it is a real calendar date
+            var dateParts = data.expiry_date.split('-');
+            var testDate = new Date(
+                parseInt(dateParts[0]),
+                parseInt(dateParts[1]) - 1,
+                parseInt(dateParts[2])
+            );
+            if (isNaN(testDate.getTime())) {
+                errors.push('Expiry date is not a valid calendar date');
+            }
         }
     }
 
@@ -742,4 +798,24 @@ function escapeHtml(text) {
     var div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+/**
+ * Move keyboard focus to the message area
+ * 
+ * This is an accessibility improvement. When a success or error
+ * message is displayed, moving focus to the message area ensures
+ * that screen reader users hear the message immediately without
+ * having to navigate to it manually.
+ * 
+ * The message area has aria-live="polite" which announces changes,
+ * but setting focus provides an additional guarantee.
+ */
+function focusMessageArea() {
+    var messageArea = document.getElementById('message-area');
+    if (messageArea) {
+        // Make the area focusable if it is not already
+        messageArea.setAttribute('tabindex', '-1');
+        messageArea.focus();
+    }
 }

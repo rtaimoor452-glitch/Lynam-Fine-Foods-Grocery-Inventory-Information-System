@@ -47,6 +47,12 @@ function runTest($testName, $condition) {
 // VALIDATION FUNCTION (duplicated from API for unit testing)
 // ============================================================
 
+// Maximum allowed values for validation (must match api/products.php)
+define('MAX_NAME_LENGTH', 100);
+define('MAX_SUPPLIER_LENGTH', 100);
+define('MAX_PRICE', 99999);
+define('MAX_QUANTITY', 99999);
+
 /**
  * Validate product input data
  * 
@@ -63,6 +69,8 @@ function validateProduct($data) {
     // Product name is required
     if (!isset($data['product_name']) || trim($data['product_name']) === '') {
         $errors[] = 'Product name is required';
+    } elseif (strlen(trim($data['product_name'])) > MAX_NAME_LENGTH) {
+        $errors[] = 'Product name must be ' . MAX_NAME_LENGTH . ' characters or less';
     }
 
     // Category is required
@@ -75,6 +83,8 @@ function validateProduct($data) {
         $errors[] = 'Price must be a valid number';
     } elseif (floatval($data['price']) < 0) {
         $errors[] = 'Price cannot be negative';
+    } elseif (floatval($data['price']) > MAX_PRICE) {
+        $errors[] = 'Price cannot exceed ' . MAX_PRICE;
     }
 
     // Quantity must be a whole number and not negative
@@ -84,6 +94,15 @@ function validateProduct($data) {
         $errors[] = 'Quantity must be a whole number';
     } elseif (intval($data['quantity']) < 0) {
         $errors[] = 'Quantity cannot be negative';
+    } elseif (intval($data['quantity']) > MAX_QUANTITY) {
+        $errors[] = 'Quantity cannot exceed ' . MAX_QUANTITY;
+    }
+
+    // Supplier is optional but has a maximum length
+    if (isset($data['supplier']) && trim($data['supplier']) !== '') {
+        if (strlen(trim($data['supplier'])) > MAX_SUPPLIER_LENGTH) {
+            $errors[] = 'Supplier name must be ' . MAX_SUPPLIER_LENGTH . ' characters or less';
+        }
     }
 
     // Expiry date must be valid if provided
@@ -229,6 +248,77 @@ $noOptionalFields = [
 ];
 $errors = validateProduct($noOptionalFields);
 runTest('Product without optional fields passes validation', count($errors) === 0);
+
+// Test 13: Product name exceeding maximum length should fail
+$longName = [
+    'product_name' => str_repeat('A', 101), // 101 characters exceeds max of 100
+    'category'     => 'Bakery',
+    'price'        => 3.50,
+    'quantity'     => 20
+];
+$errors = validateProduct($longName);
+runTest('Product name over 100 characters fails validation', count($errors) > 0);
+
+// Test 14: Product name at exactly maximum length should pass
+$exactLengthName = [
+    'product_name' => str_repeat('A', 100), // Exactly 100 characters
+    'category'     => 'Bakery',
+    'price'        => 3.50,
+    'quantity'     => 20
+];
+$errors = validateProduct($exactLengthName);
+runTest('Product name at exactly 100 characters passes validation', count($errors) === 0);
+
+// Test 15: Price exceeding maximum should fail
+$highPrice = [
+    'product_name' => 'Expensive Item',
+    'category'     => 'Deli',
+    'price'        => 100000, // Exceeds max of 99999
+    'quantity'     => 5
+];
+$errors = validateProduct($highPrice);
+runTest('Price over 99999 fails validation', count($errors) > 0);
+
+// Test 16: Quantity exceeding maximum should fail
+$highQuantity = [
+    'product_name' => 'Bulk Item',
+    'category'     => 'Grocery',
+    'price'        => 10.00,
+    'quantity'     => 100000 // Exceeds max of 99999
+];
+$errors = validateProduct($highQuantity);
+runTest('Quantity over 99999 fails validation', count($errors) > 0);
+
+// Test 17: Supplier name exceeding maximum length should fail
+$longSupplier = [
+    'product_name' => 'Test Product',
+    'category'     => 'Bakery',
+    'price'        => 3.50,
+    'quantity'     => 20,
+    'supplier'     => str_repeat('S', 101) // 101 characters exceeds max of 100
+];
+$errors = validateProduct($longSupplier);
+runTest('Supplier name over 100 characters fails validation', count($errors) > 0);
+
+// Test 18: Non-numeric price should fail
+$nonNumericPrice = [
+    'product_name' => 'Test Product',
+    'category'     => 'Bakery',
+    'price'        => 'abc',
+    'quantity'     => 20
+];
+$errors = validateProduct($nonNumericPrice);
+runTest('Non-numeric price fails validation', count($errors) > 0);
+
+// Test 19: Non-numeric quantity should fail
+$nonNumericQuantity = [
+    'product_name' => 'Test Product',
+    'category'     => 'Bakery',
+    'price'        => 3.50,
+    'quantity'     => 'xyz'
+];
+$errors = validateProduct($nonNumericQuantity);
+runTest('Non-numeric quantity fails validation', count($errors) > 0);
 
 // ============================================================
 // CRUD TESTS (using a separate test database)
