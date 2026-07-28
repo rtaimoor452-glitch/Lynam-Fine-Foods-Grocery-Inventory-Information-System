@@ -1,0 +1,24 @@
+# Database files
+db/*.db
+db/*.sqlite
+db/*.sqlite3
+
+# PHP error logs
+*.log
+php_errors.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.bak
