@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Grocery Inventory Information System for Lynam Fine Foods, Goatstown, Dublin 14">
+    <title>Lynam Fine Foods - Inventory System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- ============================================================ -->
+    <!-- HEADER - Shop name and system title                          -->
+    <!-- ============================================================ -->
+    <header>
+        <h1>Lynam Fine Foods</h1>
+        <p>Grocery Inventory Information System</p>
+    </header>
+
+    <main>
+
+        <!-- ============================================================ -->
+        <!-- MESSAGE AREA - Success and error messages appear here        -->
+        <!-- ============================================================ -->
+        <div id="message-area" role="alert" aria-live="polite"></div>
+
+        <!-- ============================================================ -->
+        <!-- SUMMARY SECTION - Total products, total stock, low stock     -->
+        <!-- ============================================================ -->
+        <section id="summary-section" aria-label="Inventory Summary">
+            <h2>Inventory Summary</h2>
+            <div id="summary-stats">
+                <div class="stat-card">
+                    <span class="stat-label">Total Products</span>
+                    <span id="total-products" class="stat-value">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Total Stock Quantity</span>
+                    <span id="total-stock" class="stat-value">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Low Stock Items</span>
+                    <span id="low-stock-count" class="stat-value">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- FORM SECTION - Add or edit a product                         -->
+        <!-- ============================================================ -->
+        <section id="form-section" aria-label="Product Form">
+            <h2 id="form-title">Add New Product</h2>
+            <form id="product-form" novalidate>
+                <!-- Hidden field to store product ID during editing -->
+                <input type="hidden" id="product-id" value="">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-name">Product Name <span class="required">*</span></label>
+                        <input type="text" id="product-name" name="product_name"
+                               placeholder="e.g. Irish Soda Bread" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">Category <span class="required">*</span></label>
+                        <select id="category" name="category" required>
+                            <option value="">-- Select Category --</option>
+                            <option value="Bakery">Bakery</option>
+                            <option value="Dairy">Dairy</option>
+                            <option value="Deli">Deli</option>
+                            <option value="Drinks">Drinks</option>
+                            <option value="Frozen">Frozen</option>
+                            <option value="Fruit & Vegetables">Fruit &amp; Vegetables</option>
+                            <option value="Grocery">Grocery</option>
+                            <option value="Meat">Meat</option>
+                            <option value="Snacks">Snacks</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="price">Price (&euro;) <span class="required">*</span></label>
+                        <input type="number" id="price" name="price"
+                               step="0.01" min="0" placeholder="e.g. 3.50" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quantity">Quantity <span class="required">*</span></label>
+                        <input type="number" id="quantity" name="quantity"
+                               step="1" min="0" placeholder="e.g. 20" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="supplier">Supplier</label>
+                        <input type="text" id="supplier" name="supplier"
+                               placeholder="e.g. Brennans">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expiry-date">Expiry Date</label>
+                        <input type="date" id="expiry-date" name="expiry_date">
+                    </div>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="submit" id="submit-btn">Add Product</button>
+                    <button type="button" id="cancel-btn" style="display: none;">Cancel Edit</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- CONTROLS SECTION - Search, filter and sort                   -->
+        <!-- ============================================================ -->
+        <section id="controls-section" aria-label="Product Controls">
+            <h2>Product List</h2>
+            <div id="controls">
+                <div class="control-group">
+                    <label for="search-input">Search by Name:</label>
+                    <input type="text" id="search-input"
+                           placeholder="Type to search products...">
+                </div>
+
+                <div class="control-group">
+                    <label for="filter-category">Filter by Category:</label>
+                    <select id="filter-category">
+                        <option value="">All Categories</option>
+                        <option value="Bakery">Bakery</option>
+                        <option value="Dairy">Dairy</option>
+                        <option value="Deli">Deli</option>
+                        <option value="Drinks">Drinks</option>
+                        <option value="Frozen">Frozen</option>
+                        <option value="Fruit & Vegetables">Fruit &amp; Vegetables</option>
+                        <option value="Grocery">Grocery</option>
+                        <option value="Meat">Meat</option>
+                        <option value="Snacks">Snacks</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="sort-by">Sort by:</label>
+                    <select id="sort-by">
+                        <option value="">Default (Newest First)</option>
+                        <option value="product_name">Name (A-Z)</option>
+                        <option value="price">Price (Low to High)</option>
+                        <option value="quantity">Quantity (Low to High)</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- TABLE SECTION - Products table with Edit and Delete buttons  -->
+        <!-- ============================================================ -->
+        <section id="table-section" aria-label="Products Table">
+            <table id="products-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Price (&euro;)</th>
+                        <th>Quantity</th>
+                        <th>Supplier</th>
+                        <th>Expiry Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="products-tbody">
+                    <!-- Product rows are inserted here by JavaScript -->
+                </tbody>
+            </table>
+            <p id="no-products-message" style="display: none;">No products found.</p>
+        </section>
+
+    </main>
+
+    <!-- ============================================================ -->
+    <!-- FOOTER                                                       -->
+    <!-- ============================================================ -->
+    <footer>
+        <p>&copy; 2025 Lynam Fine Foods Inventory System &mdash; Academic Project (B9IS123)</p>
+    </footer>
+
+    <!-- JavaScript file - loaded at end of body for performance -->
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>
