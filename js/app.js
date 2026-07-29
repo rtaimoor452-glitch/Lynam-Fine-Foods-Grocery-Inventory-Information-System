@@ -75,6 +75,52 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('search-input').addEventListener('input', applyFilters);
     document.getElementById('filter-category').addEventListener('change', applyFilters);
     document.getElementById('sort-by').addEventListener('change', applyFilters);
+
+    // ============================================================
+    // INLINE VALIDATION EVENT LISTENERS
+    // ============================================================
+
+    // Validate each field when the user leaves it (blur event)
+    // This gives immediate feedback about errors
+    document.getElementById('product-name').addEventListener('blur', function () {
+        validateField('product-name');
+    });
+    document.getElementById('category').addEventListener('blur', function () {
+        validateField('category');
+    });
+    document.getElementById('price').addEventListener('blur', function () {
+        validateField('price');
+    });
+    document.getElementById('quantity').addEventListener('blur', function () {
+        validateField('quantity');
+    });
+    document.getElementById('supplier').addEventListener('blur', function () {
+        validateField('supplier');
+    });
+    document.getElementById('expiry-date').addEventListener('blur', function () {
+        validateField('expiry-date');
+    });
+
+    // Clear errors as the user types (input event) or changes (change event)
+    // This removes the red border and error message as soon as the user fixes it
+    document.getElementById('product-name').addEventListener('input', function () {
+        clearFieldError('product-name');
+    });
+    document.getElementById('category').addEventListener('change', function () {
+        clearFieldError('category');
+    });
+    document.getElementById('price').addEventListener('input', function () {
+        clearFieldError('price');
+    });
+    document.getElementById('quantity').addEventListener('input', function () {
+        clearFieldError('quantity');
+    });
+    document.getElementById('supplier').addEventListener('input', function () {
+        clearFieldError('supplier');
+    });
+    document.getElementById('expiry-date').addEventListener('input', function () {
+        clearFieldError('expiry-date');
+    });
 });
 
 // ============================================================
@@ -363,6 +409,9 @@ function handleFormSubmit(event) {
     if (errors.length > 0) {
         showMessage('Please fix the following errors: ' + errors.join(', '), 'error');
         focusMessageArea();
+
+        // Also show inline errors on each invalid field
+        showInlineErrorsFromValidation(productData);
         return;
     }
 
@@ -438,7 +487,8 @@ function cancelEdit() {
  * Reset the form to its default state (add mode)
  * 
  * Clears all form fields, resets the title and button text,
- * and hides the Cancel Edit button
+ * and hides the Cancel Edit button. Also clears all inline
+ * validation errors and field styling.
  */
 function resetForm() {
     // Clear all form fields using the built-in reset method
@@ -456,6 +506,9 @@ function resetForm() {
 
     // Hide the Cancel Edit button
     document.getElementById('cancel-btn').style.display = 'none';
+
+    // Clear all inline validation errors and red/green borders
+    clearAllFieldErrors();
 }
 
 // ============================================================
@@ -693,6 +746,264 @@ function updateSummary() {
         lowStockElement.classList.add('stat-warning');
     } else {
         lowStockElement.classList.remove('stat-warning');
+    }
+}
+
+// ============================================================
+// INLINE FIELD VALIDATION
+// ============================================================
+
+/**
+ * Validate a single form field and show error feedback
+ * 
+ * This function is called on the 'blur' event (when the user
+ * leaves a field). It checks the field value and displays an
+ * error message below the field if validation fails.
+ * 
+ * The field gets a red border (field-invalid) or green border
+ * (field-valid) depending on the result.
+ * 
+ * @param {string} fieldId - The ID of the input/select element
+ */
+function validateField(fieldId) {
+    var field = document.getElementById(fieldId);
+    if (!field) {
+        return;
+    }
+
+    var value = field.value.trim();
+    var error = '';
+
+    switch (fieldId) {
+        case 'product-name':
+            if (value === '') {
+                error = 'Product name is required';
+            } else if (value.length > MAX_NAME_LENGTH) {
+                error = 'Max ' + MAX_NAME_LENGTH + ' characters allowed';
+            }
+            break;
+
+        case 'category':
+            if (value === '') {
+                error = 'Please select a category';
+            }
+            break;
+
+        case 'price':
+            if (value === '') {
+                error = 'Price is required';
+            } else if (isNaN(value)) {
+                error = 'Price must be a number';
+            } else if (parseFloat(value) < 0) {
+                error = 'Price cannot be negative';
+            } else if (parseFloat(value) > MAX_PRICE) {
+                error = 'Price cannot exceed ' + MAX_PRICE;
+            }
+            break;
+
+        case 'quantity':
+            if (value === '') {
+                error = 'Quantity is required';
+            } else if (isNaN(value)) {
+                error = 'Quantity must be a number';
+            } else if (parseFloat(value) % 1 !== 0) {
+                error = 'Must be a whole number (no decimals)';
+            } else if (parseInt(value) < 0) {
+                error = 'Quantity cannot be negative';
+            } else if (parseInt(value) > MAX_QUANTITY) {
+                error = 'Quantity cannot exceed ' + MAX_QUANTITY;
+            }
+            break;
+
+        case 'supplier':
+            // Supplier is optional, only check max length
+            if (value.length > MAX_SUPPLIER_LENGTH) {
+                error = 'Max ' + MAX_SUPPLIER_LENGTH + ' characters allowed';
+            }
+            break;
+
+        case 'expiry-date':
+            // Expiry date is optional but must be valid if entered
+            if (value !== '') {
+                var dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                if (!dateRegex.test(value)) {
+                    error = 'Date must be in YYYY-MM-DD format';
+                } else {
+                    var parts = value.split('-');
+                    var testDate = new Date(
+                        parseInt(parts[0]),
+                        parseInt(parts[1]) - 1,
+                        parseInt(parts[2])
+                    );
+                    if (isNaN(testDate.getTime())) {
+                        error = 'Not a valid calendar date';
+                    }
+                }
+            }
+            break;
+    }
+
+    if (error) {
+        showFieldError(fieldId, error);
+    } else {
+        // Only show green border if the user has entered something
+        // or the field is required
+        if (value !== '' || field.hasAttribute('required')) {
+            setFieldState(fieldId, value !== '' ? 'valid' : '');
+        }
+        clearFieldError(fieldId);
+    }
+}
+
+/**
+ * Map field IDs to their error element IDs
+ * 
+ * This object maps each form field to its corresponding error
+ * span element in the HTML. Used by showFieldError and clearFieldError.
+ */
+var errorElementMap = {
+    'product-name': 'name-error',
+    'category': 'category-error',
+    'price': 'price-error',
+    'quantity': 'qty-error',
+    'supplier': 'supplier-error',
+    'expiry-date': 'expiry-error'
+};
+
+/**
+ * Show an error message below a form field
+ * 
+ * Sets the error text in the error span, adds the red border
+ * class to the input, and removes any green valid class.
+ * 
+ * @param {string} fieldId - The ID of the input/select element
+ * @param {string} message - The error message to display
+ */
+function showFieldError(fieldId, message) {
+    var errorId = errorElementMap[fieldId];
+    if (errorId) {
+        var errorElement = document.getElementById(errorId);
+        if (errorElement) {
+            errorElement.textContent = message;
+        }
+    }
+    setFieldState(fieldId, 'invalid');
+}
+
+/**
+ * Clear the error message and styling from a form field
+ * 
+ * Removes the error text, removes the red/green border class,
+ * and resets the field to its default appearance.
+ * 
+ * @param {string} fieldId - The ID of the input/select element
+ */
+function clearFieldError(fieldId) {
+    var errorId = errorElementMap[fieldId];
+    if (errorId) {
+        var errorElement = document.getElementById(errorId);
+        if (errorElement) {
+            errorElement.textContent = '';
+        }
+    }
+    // Remove both valid and invalid classes
+    var field = document.getElementById(fieldId);
+    if (field) {
+        field.classList.remove('field-invalid');
+        field.classList.remove('field-valid');
+    }
+}
+
+/**
+ * Set the visual state of a form field (valid or invalid)
+ * 
+ * Adds the appropriate CSS class (field-valid or field-invalid)
+ * and removes the opposite class to avoid conflicting styles.
+ * 
+ * @param {string} fieldId - The ID of the input/select element
+ * @param {string} state - 'valid' or 'invalid'
+ */
+function setFieldState(fieldId, state) {
+    var field = document.getElementById(fieldId);
+    if (!field) {
+        return;
+    }
+
+    // Remove both classes first
+    field.classList.remove('field-valid');
+    field.classList.remove('field-invalid');
+
+    // Add the appropriate class
+    if (state === 'valid') {
+        field.classList.add('field-valid');
+    } else if (state === 'invalid') {
+        field.classList.add('field-invalid');
+    }
+}
+
+/**
+ * Clear all inline validation errors from the form
+ * 
+ * Called when the form is reset (after successful add or
+ * when cancelling an edit). Removes all error messages
+ * and green/red border classes.
+ */
+function clearAllFieldErrors() {
+    var fieldIds = ['product-name', 'category', 'price', 'quantity', 'supplier', 'expiry-date'];
+    for (var i = 0; i < fieldIds.length; i++) {
+        clearFieldError(fieldIds[i]);
+    }
+}
+
+/**
+ * Show inline errors on all invalid fields after form submission
+ * 
+ * When the user clicks submit and validation fails, this function
+ * highlights each invalid field with a red border and error message.
+ * This complements the top-level error message by pointing to
+ * exactly which fields need to be fixed.
+ * 
+ * @param {Object} data - The product data from the form
+ */
+function showInlineErrorsFromValidation(data) {
+    // Check each field and show its specific error if invalid
+    if (!data.product_name || data.product_name.trim() === '') {
+        showFieldError('product-name', 'Product name is required');
+    } else if (data.product_name.length > MAX_NAME_LENGTH) {
+        showFieldError('product-name', 'Max ' + MAX_NAME_LENGTH + ' characters allowed');
+    }
+
+    if (!data.category || data.category.trim() === '') {
+        showFieldError('category', 'Please select a category');
+    }
+
+    if (data.price === '' || isNaN(data.price)) {
+        showFieldError('price', 'Price is required');
+    } else if (parseFloat(data.price) < 0) {
+        showFieldError('price', 'Price cannot be negative');
+    } else if (parseFloat(data.price) > MAX_PRICE) {
+        showFieldError('price', 'Price cannot exceed ' + MAX_PRICE);
+    }
+
+    if (data.quantity === '' || isNaN(data.quantity)) {
+        showFieldError('quantity', 'Quantity is required');
+    } else if (parseFloat(data.quantity) % 1 !== 0) {
+        showFieldError('quantity', 'Must be a whole number');
+    } else if (parseInt(data.quantity) < 0) {
+        showFieldError('quantity', 'Quantity cannot be negative');
+    } else if (parseInt(data.quantity) > MAX_QUANTITY) {
+        showFieldError('quantity', 'Quantity cannot exceed ' + MAX_QUANTITY);
+    }
+
+    if (data.supplier && data.supplier.length > MAX_SUPPLIER_LENGTH) {
+        showFieldError('supplier', 'Max ' + MAX_SUPPLIER_LENGTH + ' characters allowed');
+    }
+
+    if (data.expiry_date && data.expiry_date.trim() !== '') {
+        var dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(data.expiry_date)) {
+            showFieldError('expiry-date', 'Date must be in YYYY-MM-DD format');
+        }
     }
 }
 

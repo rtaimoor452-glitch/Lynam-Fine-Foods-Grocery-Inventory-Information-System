@@ -65,13 +65,16 @@
                         <input type="text" id="product-name" name="product_name"
                                placeholder="e.g. Irish Soda Bread" required
                                maxlength="100" aria-required="true"
-                               aria-describedby="name-hint">
+                               aria-describedby="name-hint name-error"
+                               autocomplete="off">
+                        <span id="name-error" class="field-error" role="alert" aria-live="assertive"></span>
                         <small id="name-hint" class="field-hint">Required. Max 100 characters.</small>
                     </div>
 
                     <div class="form-group">
                         <label for="category">Category <span class="required" aria-hidden="true">*</span></label>
-                        <select id="category" name="category" required aria-required="true">
+                        <select id="category" name="category" required aria-required="true"
+                                aria-describedby="category-error">
                             <option value="">-- Select Category --</option>
                             <option value="Bakery">Bakery</option>
                             <option value="Dairy">Dairy</option>
@@ -84,6 +87,7 @@
                             <option value="Snacks">Snacks</option>
                             <option value="Other">Other</option>
                         </select>
+                        <span id="category-error" class="field-error" role="alert" aria-live="assertive"></span>
                     </div>
                 </div>
 
@@ -92,16 +96,20 @@
                         <label for="price">Price (&euro;) <span class="required" aria-hidden="true">*</span></label>
                         <input type="number" id="price" name="price"
                                step="0.01" min="0" max="99999" placeholder="e.g. 3.50" required
-                               aria-required="true" aria-describedby="price-hint">
-                        <small id="price-hint" class="field-hint">Required. Must be 0 or greater.</small>
+                               aria-required="true" aria-describedby="price-hint price-error"
+                               autocomplete="off">
+                        <span id="price-error" class="field-error" role="alert" aria-live="assertive"></span>
+                        <small id="price-hint" class="field-hint">Required. 0.00 to 99,999.</small>
                     </div>
 
                     <div class="form-group">
                         <label for="quantity">Quantity <span class="required" aria-hidden="true">*</span></label>
                         <input type="number" id="quantity" name="quantity"
                                step="1" min="0" max="99999" placeholder="e.g. 20" required
-                               aria-required="true" aria-describedby="qty-hint">
-                        <small id="qty-hint" class="field-hint">Required. Whole number, 0 or greater.</small>
+                               aria-required="true" aria-describedby="qty-hint qty-error"
+                               autocomplete="off">
+                        <span id="qty-error" class="field-error" role="alert" aria-live="assertive"></span>
+                        <small id="qty-hint" class="field-hint">Required. Whole number, 0 to 99,999.</small>
                     </div>
                 </div>
 
@@ -110,15 +118,18 @@
                         <label for="supplier">Supplier</label>
                         <input type="text" id="supplier" name="supplier"
                                placeholder="e.g. Brennans" maxlength="100"
-                               aria-describedby="supplier-hint">
+                               aria-describedby="supplier-hint supplier-error"
+                               autocomplete="off">
+                        <span id="supplier-error" class="field-error" role="alert" aria-live="assertive"></span>
                         <small id="supplier-hint" class="field-hint">Optional. Max 100 characters.</small>
                     </div>
 
                     <div class="form-group">
                         <label for="expiry-date">Expiry Date</label>
                         <input type="date" id="expiry-date" name="expiry_date"
-                               aria-describedby="expiry-hint">
-                        <small id="expiry-hint" class="field-hint">Optional. Format: YYYY-MM-DD.</small>
+                               aria-describedby="expiry-hint expiry-error">
+                        <span id="expiry-error" class="field-error" role="alert" aria-live="assertive"></span>
+                        <small id="expiry-hint" class="field-hint">Optional. Must be a valid date.</small>
                     </div>
                 </div>
 

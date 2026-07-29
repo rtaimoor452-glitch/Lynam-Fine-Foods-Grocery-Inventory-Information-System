@@ -456,6 +456,42 @@ footer {
     font-style: italic;
 }
 
+/* ---- Inline Field Errors ---- */
+/* Shown below form fields when validation fails */
+
+.field-error {
+    display: block;
+    font-size: 0.82em;
+    color: #dc3545;
+    margin-top: 4px;
+    font-weight: bold;
+    min-height: 1.2em;
+}
+
+/* ---- Valid and Invalid Field Border Colours ---- */
+/* Green border for valid fields, red border for invalid fields */
+
+.form-group input.field-valid,
+.form-group select.field-valid {
+    border-color: #28a745;
+}
+
+.form-group input.field-invalid,
+.form-group select.field-invalid {
+    border-color: #dc3545;
+    background-color: #fff8f8;
+}
+
+.form-group input.field-valid:focus,
+.form-group select.field-valid:focus {
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+}
+
+.form-group input.field-invalid:focus,
+.form-group select.field-invalid:focus {
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
+
 /* ---- Disabled Button State ---- */
 /* Visual feedback when buttons are disabled during API calls */
 
