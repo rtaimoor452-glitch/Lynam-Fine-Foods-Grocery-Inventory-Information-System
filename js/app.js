@@ -1130,3 +1130,71 @@ function focusMessageArea() {
         messageArea.focus();
     }
 }
+/**
+ * 
+ * cODE GET FROM cHATGPT AND GOOGLE ANTIGRAVITY=https://chatgpt.com/c/6a7351dd-85b4-83e8-aaa0-75f89154965a
+ * 
+ * I have thoroughly read and understood all the requirements, constraints, and grading criteria for your DBS Assessment (B9IS123 - Programming for Information Systems) project.
+
+Summary of Key Target Standards (Aiming for Exceptional/Outstanding - 80%+):
+Architecture & Tech Stack:
+Frontend: Clean, uncomplicated HTML/JavaScript interface decoupled from the backend (making asynchronous API calls with standard DOM rendering—no post-and-refresh page reloads).
+Backend: Node.js/Express API with robust storage (e.g., SQLite or structured JSON/SQL database) enforcing data validation and integrity.
+Core Features:
+Complete CRUD operations (Create, Read, Update, Delete).
+Additional features: Search, sorting, input validation, reporting/business logic, and external API service integration.
+Testing:
+Unit tests covering key CRUD business logic.
+Integration testing verifying frontend and backend API communication.
+Documentation & Attribution:
+Assignment cover sheet included.
+Full requirements specification, architectural description, testing summary, and attribution section.
+Please go ahead and share your selected topic or company, and we will get started on designing and implementing your proof-of-concept information system!
+
+12:27 AM, 7/29/2026
+1:10 AM, 7/29/2026
+✅ Stage 1 Complete
+Here's a summary of what's done:
+
+Files in your project
+File	Status
+
+
+README.md
+✅ Full project description with cover sheet, requirements, architecture, API design, attribution
+
+
+.gitignore
+✅ Excludes .db files, OS files, IDE settings
+Empty folders: api/, config/, css/, db/, js/, tests/	✅ Ready for future stages
+Git history
+aac9da6 chore: initialize project with gitignore and project documentation
+40b766e docs: define Lynam Fine Foods inventory requirements
+Both commits are pushed to origin/main.
+
+Code explanation
+There's no application code yet — this stage is purely requirements and planning. The 
+
+README.md
+ documents:
+
+What the system does (CRUD inventory management)
+Why it's needed (manual tracking problems for a small shop)
+How it works (JavaScript Fetch → PHP API → SQLite)
+What technologies are used (no frameworks, just HTML/CSS/JS/PHP/SQLite)
+Manual testing for this stage
+Open your GitHub repository in a browser and confirm the README renders correctly
+Confirm the .gitignore file is present
+Confirm no .db files appear in the repository
+Ready for Stage 2 when you are — that will create the Index.html with the product form, product table, search/filter/sort controls, and summary statistics section. Just say "Stage 2" to continue.
+
+Walkthrough
+1:06 AM, 7/29/2026
+1:14 AM, 7/29/2026
+1:14 AM, 7/29/2026
+1:15 AM, 7/29/2026
+1:15 AM, 7/29/2026
+compelte this
+ * 
+ * 
+ * */
