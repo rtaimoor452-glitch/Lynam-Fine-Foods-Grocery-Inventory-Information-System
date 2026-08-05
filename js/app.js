@@ -1195,6 +1195,10 @@ Walkthrough
 1:15 AM, 7/29/2026
 1:15 AM, 7/29/2026
 compelte this
+
+Command running on terminal:php -S localhost:8000
+
+
  * 
  * 
  * */
